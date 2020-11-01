@@ -43,7 +43,6 @@ func main() {
 		MaxHeaderBytes: 1 << 20, // 1048576
 	}
 
-	//	log.Fatal(s.ListenAndServeTLS("./mutateme.pem", "./mutateme.key"))
-	log.Fatal(s.ListenAndServeTLS())
+	log.Fatal(s.ListenAndServeTLS("./mutateme.pem", "./mutateme.key"))
 
 }
