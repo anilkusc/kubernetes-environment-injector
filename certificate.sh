@@ -84,3 +84,6 @@ done
 echo "... creating ${app}.pem cert file"
 echo "\$serverCert | openssl base64 -d -A -out ${APP}.pem"
 echo ${serverCert} | openssl base64 -d -A -out ${APP}.pem
+echo "-------------------------------------------------------------------------------"
+kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.certificate-authority-data}'
+echo "-------------------------------------------------------------------------------"
