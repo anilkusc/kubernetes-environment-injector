@@ -1,1 +1,2 @@
 # kubernetes-environment-injector
+This injector injects all of environment values of owned by injector pod to new created pod.So you can inject all of your environment variables by default and no effort.
