@@ -49,7 +49,7 @@ func Mutate(body []byte) ([]byte, error) {
 				// http://jsonpatch.com/
 				"op":    "add",
 				"path":  fmt.Sprintf("/spec/containers/%d/env", i),
-				"value": {"test": "test"},
+				"value": fmt.Sprintf("{\"test\": \"test\"}"),
 			}
 			p = append(p, patch)
 		}
