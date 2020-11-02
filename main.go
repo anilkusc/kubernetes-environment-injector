@@ -36,7 +36,7 @@ func main() {
 	mux.HandleFunc("/mutate", handleMutate)
 
 	s := &http.Server{
-		Addr:           ":8443",
+		Addr:           ":443",
 		Handler:        mux,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,

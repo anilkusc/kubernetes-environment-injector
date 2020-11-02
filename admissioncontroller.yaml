@@ -7,7 +7,7 @@ metadata:
 spec:
   ports:
     - port: 443
-      targetPort: 8443
+      targetPort: 443
   selector:
     app: environment-injector   
 ---
@@ -29,25 +29,25 @@ spec:
         app: environment-injector
     spec:
       containers:
-        - name: environment-injector
-          image: anilkuscu95/environment-injector              
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 8443                
-            volumeMounts:
-              - name: key
-                mountPath: /app/mutateme.key
-                subPath: mutateme.key
-              - name: pem
-                mountPath: /app/mutateme.pem
-                subPath: mutateme.pem
-            volumes:
-              - name: key
-                configMap:
-                  name: key
-              - name: pem
-                configMap:
-                  name: pem
+      - name: environment-injector
+        image: anilkuscu95/environment-injector              
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 443                
+        volumeMounts:
+        - name: key
+          mountPath: /app/mutateme.key
+          subPath: mutateme.key
+        - name: pem
+          mountPath: /app/mutateme.pem
+          subPath: mutateme.pem
+      volumes:
+      - name: key
+        configMap:
+          name: key
+      - name: pem
+        configMap:
+          name: pem
 ---
   kind: ConfigMap
   apiVersion: v1
