@@ -89,7 +89,7 @@ caBundle=$( kubectl config view --raw --minify --flatten -o jsonpath='{.clusters
 #echo $caBundle
 #echo "-------------------------------------------------------------------------------"
 key=$(cat mutateme.key | sed 's/^/     /')
-pem=$(cat mutateme.pem | sed 's/^/     /)
+pem=$(cat mutateme.pem | sed 's/^/     /')
 echo "
 apiVersion: v1
 kind: Service
