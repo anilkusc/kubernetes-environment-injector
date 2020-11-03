@@ -82,13 +82,13 @@ webhooks:
       service:
         name: environment-injector
         namespace: default
-        path: "/mutate"
+        path: '/mutate'
         port: 443
     rules:
-      - operations: ["CREATE"]
-        apiGroups: [""]
-        apiVersions: ["v1"]
-        resources: ["pods"]
+      - operations: ['CREATE']
+        apiGroups: ['']
+        apiVersions: ['v1']
+        resources: ['pods']
     sideEffects: None
     timeoutSeconds: 5
     reinvocationPolicy: Never

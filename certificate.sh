@@ -1,6 +1,6 @@
 #! /bin/sh
 set -o errexit
-
+yum install nano openssl -y
 export APP="${1:-mutateme}"
 export NAMESPACE="${2:-default}"
 export CSR_NAME="${APP}.${NAMESPACE}.svc"
@@ -84,6 +84,109 @@ done
 echo "... creating ${app}.pem cert file"
 echo "\$serverCert | openssl base64 -d -A -out ${APP}.pem"
 echo ${serverCert} | openssl base64 -d -A -out ${APP}.pem
+caBundle=$( kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.certificate-authority-data}' )
 echo "-------------------------------------------------------------------------------"
-kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.certificate-authority-data}'
+echo $caBundle
 echo "-------------------------------------------------------------------------------"
+key=$(cat mutateme.key)
+pem=$(cat mutateme.pem)
+echo "
+apiVersion: v1
+kind: Service
+metadata:
+  name: environment-injector
+  labels:
+    app: environment-injector
+spec:
+  ports:
+    - port: 443
+      targetPort: 443
+  selector:
+    app: environment-injector   
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: environment-injector
+  labels:
+    app: environment-injector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: environment-injector
+  template:
+    metadata:
+      name: environment-injector
+      labels:
+        app: environment-injector
+    spec:
+      containers:
+      - name: environment-injector
+        image: anilkuscu95/environment-injector              
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 443                
+        volumeMounts:
+        - name: key
+          mountPath: /app/mutateme.key
+          subPath: mutateme.key
+        - name: pem
+          mountPath: /app/mutateme.pem
+          subPath: mutateme.pem
+      volumes:
+      - name: key
+        configMap:
+          name: key
+      - name: pem
+        configMap:
+          name: pem
+---
+  kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: key
+    labels:
+      app: environment-injector
+  data:
+    mutateme.key: |-
+      $key
+---
+  kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: pem
+    labels:
+      app: environment-injector
+  data:
+    mutateme.pem: |-
+      $pem
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: environment-injector
+  labels:
+    app: environment-injector
+webhooks:
+  - name: environment-injector.default.svc.cluster.local
+    clientConfig:
+      caBundle: $caBundle
+      service:
+        name: environment-injector
+        namespace: default
+        path: '/mutate'
+        port: 443
+    rules:
+      - operations: ['CREATE']
+        apiGroups: ['']
+        apiVersions: ['v1']
+        resources: ['pods']
+    sideEffects: None
+    timeoutSeconds: 5
+    reinvocationPolicy: Never
+    failurePolicy: Ignore
+    namespaceSelector:
+      matchLabels:
+        environment-injector: enabled
+" > sample.yaml
