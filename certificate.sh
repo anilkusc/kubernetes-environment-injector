@@ -84,12 +84,12 @@ done
 echo "... creating ${app}.pem cert file"
 echo "\$serverCert | openssl base64 -d -A -out ${APP}.pem"
 echo ${serverCert} | openssl base64 -d -A -out ${APP}.pem
-caBundle=$( kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.certificate-authority-data}' )
-echo "-------------------------------------------------------------------------------"
-echo $caBundle
-echo "-------------------------------------------------------------------------------"
-key=$(cat mutateme.key)
-pem=$(cat mutateme.pem)
+caBundle=$( kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.certificate-authority-data}' | sed 's/\\n//' )
+#echo "-------------------------------------------------------------------------------"
+#echo $caBundle
+#echo "-------------------------------------------------------------------------------"
+key=$(cat mutateme.key | sed 's/^/     /')
+pem=$(cat mutateme.pem | sed 's/^/     /)
 echo "
 apiVersion: v1
 kind: Service
@@ -150,7 +150,7 @@ spec:
       app: environment-injector
   data:
     mutateme.key: |-
-      $key
+$key
 ---
   kind: ConfigMap
   apiVersion: v1
@@ -160,7 +160,7 @@ spec:
       app: environment-injector
   data:
     mutateme.pem: |-
-      $pem
+$pem
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
