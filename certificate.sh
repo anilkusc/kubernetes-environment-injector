@@ -1,7 +1,7 @@
 #! /bin/sh
 set -o errexit
 yum install nano openssl -y
-export APP="${1:-mutateme}"
+export APP="${1:-environment-injector}"
 export NAMESPACE="${2:-default}"
 export CSR_NAME="${APP}.${NAMESPACE}.svc"
 
